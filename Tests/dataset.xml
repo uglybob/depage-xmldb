@@ -150,7 +150,7 @@
       <value>TEXT_NODE</value>
     </row>
   </table>
-  <table name="test_db.xmldb_proj_test_history">
+  <table name="xmldb_proj_test_history">
     <column>doc_id</column>
     <column>hash</column>
     <column>xml</column>
@@ -175,5 +175,8 @@
       <value>1</value>
       <value>1</value>
     </row>
+  </table>
+  <table name="xmldb_proj_test_freenodes">
+    <column>id</column>
   </table>
 </dataset>

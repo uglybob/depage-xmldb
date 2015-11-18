@@ -4,6 +4,9 @@
 
     @tablename _xmltree
     @connection _xmldocs
+    @connection _freenodes
+    @connection _after_delete_node
+    @connection _after_insert_node
     @version 1.5.0-beta.1
 */
 CREATE TABLE `_xmltree` (
@@ -21,3 +24,24 @@ CREATE TABLE `_xmltree` (
   CONSTRAINT `_xmltree_ibfk_1` FOREIGN KEY (`id_parent`) REFERENCES `_xmltree` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `_xmltree_ibfk_2` FOREIGN KEY (`id_doc`) REFERENCES `_xmldocs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
+
+/*
+ @version 1.5.0-beta.2
+*/
+DROP TRIGGER IF EXISTS `_after_delete_node`;
+CREATE TRIGGER `_after_delete_node`
+AFTER DELETE ON `_xmltree` FOR EACH ROW
+
+BEGIN
+    INSERT INTO `_freenodes`
+    VALUES ( OLD.id );
+END;
+
+DROP TRIGGER IF EXISTS `_after_insert_node`;
+CREATE TRIGGER `_after_insert_node`
+AFTER INSERT ON `_xmltree` FOR EACH ROW
+
+BEGIN
+    DELETE FROM `_freenodes`
+    WHERE id = NEW.id;
+END;
