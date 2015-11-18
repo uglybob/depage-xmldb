@@ -24,6 +24,7 @@ class Document
     private $table_docs;
     private $table_xml;
     private $table_nodetypes;
+    private $table_freenodes;
 
     private $transaction = 0;
 
@@ -34,7 +35,7 @@ class Document
     private $id_data_attribute = "dataid";
 
     private $dont_strip_white = array(); // TODO set when document is loaded - add to doctypes base
-    private $free_element_ids = array();
+    protected $free_element_ids = array();
 
     private $doctypeHandlers = array();
     // }}}
@@ -58,6 +59,7 @@ class Document
         $this->table_docs = $xmldb->table_docs;
         $this->table_xml = $xmldb->table_xml;
         $this->table_nodetypes = $xmldb->table_nodetypes;
+        $this->table_freenodes = $xmldb->table_freenodes;
 
         $this->doc_id = $doc_id;
     }
@@ -1118,49 +1120,22 @@ class Document
      */
     protected function getFreeNodeIds($needed = 1)
     {
-        // @todo check to replace this with an extra table of deleted ids (trigger on delete)
-        /* see here:
-            CREATE TRIGGER log_patron_delete AFTER DELETE on patrons
-            FOR EACH ROW
-            BEGIN
-            DELETE FROM patron_info
-                WHERE patron_info.pid = old.id;
-            END
-         */
         $this->free_element_ids = array();
-        $lastMax = 0;
 
-        do {
-            // @todo for some reason preparing before the loop does not work with native prepared statements
-            $query = $this->pdo->prepare(
-                "SELECT row AS id FROM
-                    (SELECT
-                        @row := @row + 1 as row, xml.id
-                    FROM
-                        {$this->table_xml} as xml,
-                        (SELECT @row := :start) r
-                    WHERE @row <> id
-                    ORDER BY xml.id) AS seq
-                WHERE NOT EXISTS (
-                    SELECT 1
-                    FROM {$this->table_xml} as xml
-                    WHERE xml.id = row
-                ) LIMIT :maxCount;"
-            );
+        $query = $this->pdo->prepare(
+            "SELECT id 
+            FROM {$this->table_freenodes}
+            LIMIT :maxCount;"
+        );
 
-            $query->execute(array(
-                'start' => $lastMax,
-                'maxCount' => $needed,
-            ));
+        $query->execute(array(
+            'maxCount' => $needed,
+        ));
 
-            $results = $query->fetchAll(\PDO::FETCH_OBJ);
-            foreach ($results as $id) {
-                $this->free_element_ids[] = $id->id;
-            }
-            if (count($results) > 0) {
-                $lastMax = (int) $id->id;
-            }
-        } while (count($this->free_element_ids) < $needed && count($results) > 0);
+        $results = $query->fetchAll(\PDO::FETCH_OBJ);
+        foreach ($results as $id) {
+            $this->free_element_ids[] = $id->id;
+        }
 
         $num = count($this->free_element_ids);
 

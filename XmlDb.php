@@ -27,6 +27,7 @@ class XmlDb implements XmlGetter
     private $table_docs;
     private $table_xml;
     private $table_nodetypes;
+    private $table_freenodes;
     private $transactions = 0;
 
     public $options;
@@ -47,6 +48,7 @@ class XmlDb implements XmlGetter
         $this->table_docs = $table_prefix . "_xmldocs";
         $this->table_xml = $table_prefix . "_xmltree";
         $this->table_nodetypes = $table_prefix . "_xmlnodetypes";
+        $this->table_freenodes = $table_prefix . "_freenodes";
     }
     // }}}
 
