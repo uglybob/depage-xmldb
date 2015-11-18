@@ -704,6 +704,30 @@ class DocumentTest extends DatabaseTestCase
         $this->assertEquals(2, $nodeArray[0]['id']);
     }
     // }}}
+
+    // {{{ testGetFreeNodeIdsDefault
+    public function testGetFreeNodeIdsDefault()
+    {
+        $this->doc->getFreeNodeIds();
+        $this->assertEquals(array(12), $this->doc->getFreeElementIds());
+    }
+    // }}}
+    // {{{ testGetFreeNodeIdsParameter
+    public function testGetFreeNodeIdsParameter()
+    {
+        $this->doc->getFreeNodeIds(5);
+        $this->assertEquals(array(12, 13, 14, 15, 16), $this->doc->getFreeElementIds());
+    }
+    // }}}
+    // {{{ testGetFreeNodeIdsAfterUnlink
+    public function testGetFreeNodeIdsAfterUnlink()
+    {
+        $this->doc->unlinkNode(9);
+
+        $this->doc->getFreeNodeIds();
+        $this->assertEquals(array(9), $this->doc->getFreeElementIds());
+    }
+    // }}}
 }
 
 /* vim:set ft=php fenc=UTF-8 sw=4 sts=4 fdm=marker et : */
